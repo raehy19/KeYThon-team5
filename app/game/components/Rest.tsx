@@ -78,7 +78,7 @@ export default function Rest({
         className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400'
         disabled={isResting}
       >
-        휴식식하기
+        휴식하기
       </button>
 
       {error && (
@@ -88,7 +88,7 @@ export default function Rest({
       {isModalOpen && (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
           <div className='bg-white p-6 rounded-lg max-w-sm w-full mx-4'>
-            <h3 className='font-bold text-lg mb-4'>휴식식 중...</h3>
+            <h3 className='font-bold text-lg mb-4'>휴식 중...</h3>
 
             <div className='w-full bg-gray-200 rounded-full h-4 mb-4'>
               <div
