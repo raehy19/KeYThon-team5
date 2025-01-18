@@ -65,38 +65,69 @@ export async function startNewGame(gameData: {
   return { game };
 }
 
+function validateWorkConditions(time: number, mental: number) {
+  const currentHour = time % 100;
+
+  if (currentHour >= 18) {
+    return {
+      isValid: false,
+      error: '너무 늦은 시간이라 알바를 할 수 없습니다.',
+    };
+  }
+
+  if (mental < 30) {
+    return {
+      isValid: false,
+      error: '멘탈이 너무 낮아서 알바를 할 수 없습니다.',
+    };
+  }
+
+  return { isValid: true };
+}
+
 export async function updateGameAfterWork(
   gameId: string,
   moneyEarned: number,
   mentalDecreased: number,
-  newTime: number,
- 
+  newTime: number
 ) {
   const supabase = await createClient();
 
-  // 먼저 현재 게임 상태를 가져옵니다
+  // 현재 게임 상태 확인
   const { data: currentGame } = await supabase
     .from('games')
-    .select('money, mental, fame')
+    .select('money, mental, time')
     .eq('id', gameId)
     .single();
 
   if (!currentGame) return { error: 'Game not found' };
 
-  // 새로운 값을 계산
-  const newMoney = currentGame.money + moneyEarned;
-  const newMental = Math.max(currentGame.mental - mentalDecreased, 0); // 멘탈이 0 이하로 내려가지 않도록
- 
+  // 서버 사이드에서 조건 검증
+  const validation = validateWorkConditions(
+    currentGame.time,
+    currentGame.mental
+  );
+  if (!validation.isValid) {
+    return { error: validation.error };
+  }
 
+  // 클라이언트에서 받은 값이 아닌, 서버에서 새로 계산
+  const moneyToAdd = Math.floor(Math.random() * 20) + 30; // 30~50만원
+  const mentalToDecrease = Math.floor(Math.random() * 10) + 5; // 5~15 감소
+  const timeToAdd = 6;
+
+  let newTimeValue = currentGame.time + timeToAdd;
+  if (newTimeValue % 100 >= 24) {
+    newTimeValue = Math.floor(newTimeValue / 100 + 1) * 100 + 8;
+  }
 
   // 업데이트 수행
   const { error } = await supabase
     .from('games')
     .update({
-      money: newMoney,
-      mental: newMental,
-      time: newTime,
-    
+      money: currentGame.money + moneyToAdd,
+      mental: Math.max(currentGame.mental - mentalToDecrease, 0),
+      time: newTimeValue,
     })
     .eq('id', gameId);
 
@@ -111,7 +142,7 @@ export async function updateGameAfterPerformance(
   mentalDecreased: number,
   newTime: number,
   Increasedfame: number
- 
+
 ) {
   const supabase = await createClient();
 
@@ -138,10 +169,12 @@ export async function updateGameAfterPerformance(
       mental: newMental,
       time: newTime,
       fame: newFame,
-    
+
     })
     .eq('id', gameId);
 
   if (error) return { error: error.message };
   return { success: true };
 }
+
+
