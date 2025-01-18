@@ -78,7 +78,7 @@ const calculateTeamPower = (game: Game): number => {
     const mateHasItem = game[`${matePrefix}has_item` as keyof Game] as boolean;
     const mateItemPower = game[
       `${matePrefix}item_power` as keyof Game
-    ] as number;
+      ] as number;
 
     if (matePower) {
       // mate가 존재하는 경우에만
@@ -225,10 +225,10 @@ export async function updateGameAfterPerformance(
     const matePrefix = `mate${i}_` as const;
     const hasItem = currentGame[
       `${matePrefix}has_item` as keyof Game
-    ] as boolean;
+      ] as boolean;
     const itemDurability = currentGame[
       `${matePrefix}item_du` as keyof Game
-    ] as number;
+      ] as number;
 
     if (hasItem && itemDurability > 0) {
       const durabilityDecrease = Math.floor(Math.random() * 10) + 5;
@@ -642,8 +642,8 @@ export async function updateGameAfterAdventure(
           ...updateFields,
           mental: Math.max(currentGame.mental - 20, 0),
           [`mate${memberIndex}_power`]:
-            (currentGame[`mate${memberIndex}_power` as keyof Game] as number) +
-            20,
+          (currentGame[`mate${memberIndex}_power` as keyof Game] as number) +
+          20,
           [`mate${memberIndex}_item_du`]: newDurability,
         } as Partial<Game>;
 
@@ -800,10 +800,10 @@ export async function updateGameAfterPractice(
     const matePower = currentGame[`${matePrefix}power` as keyof Game] as number;
     const hasItem = currentGame[
       `${matePrefix}has_item` as keyof Game
-    ] as boolean;
+      ] as boolean;
     const itemDurability = currentGame[
       `${matePrefix}item_du` as keyof Game
-    ] as number;
+      ] as number;
 
     if (matePower > 0) {
       // 팀원이 존재하는 경우
