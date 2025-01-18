@@ -4,6 +4,7 @@ import { formatGameTime } from '@/utils/time';
 import PartTimeJob from './components/PartTimeJob';
 import Performance from './components/Performance';
 import Image from 'next/image';
+import Rest from './components/Rest';
 
 // 팀원 정보를 보여주는 컴포넌트
 function TeamMateInfo({
@@ -153,6 +154,13 @@ export default async function GamePage() {
             mental={game.mental}
             fame={game.fame}
           />
+
+          <Rest
+           gameId={game.id}
+           currentTime={game.time}
+           mental={game.mental}
+           />
+
         </div>
       </div>
 
