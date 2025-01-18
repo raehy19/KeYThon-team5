@@ -66,7 +66,6 @@ export default function PartTimeJob({
       newTime = getNextDayTime(newTime);
     }
 
-    // async/await 대신 Promise 체이닝 사용
     updateGameAfterWork(gameId, moneyEarned, mentalDecreased, newTime)
       .then(() => {
         setIsModalOpen(false);
