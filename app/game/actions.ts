@@ -68,7 +68,7 @@ export async function startNewGame(gameData: {
 function validateWorkConditions(time: number, mental: number) {
   const currentHour = time % 100;
 
-  if (currentHour >= 18) {
+  if (currentHour > 18) {
     return {
       isValid: false,
       error: '너무 늦은 시간이라 알바를 할 수 없습니다.',
