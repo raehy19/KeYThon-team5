@@ -19,7 +19,7 @@ export default function StartGameForm() {
   const [formData, setFormData] = useState<GameStartData>({
     main_name: '',
     main_job: '',
-    main_img: '/characters/default.png',
+    main_img: '/img/default.png',
     main_power: 10,
   });
 
@@ -48,9 +48,35 @@ export default function StartGameForm() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+
+    let updates: Partial<GameStartData> = { [name]: value };
+
+    if (name === 'main_job') {
+      switch (value) {
+        case '메인보컬':
+          updates.main_img = '/img/v1.png';
+          break;
+        case '베이스':
+          updates.main_img = '/img/b1.png';
+          break;
+        case '드럼':
+          updates.main_img = '/img/d1.png';
+          break;
+        case '일렉기타':
+          updates.main_img = '/img/g1.png';
+          break;
+        case '키보드':
+          updates.main_img = '/img/k1.png';
+          break;
+        default:
+          updates.main_img = '';
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+      ...(name === 'main_job' && updates),
     }));
   };
 
