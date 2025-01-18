@@ -5,8 +5,10 @@ import StartGameForm from '@/components/StartGameForm';
 import { formatGameTime } from '@/utils/time';
 import PartTimeJob from './components/PartTimeJob';
 import Performance from './components/Performance';
+import Rest from '@/app/game/components/Rest';
 import ItemShop from '@/app/game/components/ItemShop';
 import RepairShop from '@/app/game/components/RepairShop';
+
 interface Character {
   name: string | null;
   img: string | null;
@@ -73,6 +75,7 @@ interface CharacterStatsProps {
   character: Character;
   isMain?: boolean;
 }
+
 const CharacterStats: React.FC<CharacterStatsProps> = ({
   character,
   isMain = false,
@@ -261,7 +264,7 @@ const GameContent: React.FC<{ game: Game }> = ({ game }) => {
             currentTime={game.time}
             mental={game.mental}
           />
-          <button className='btn btn-success'>휴식하기</button>
+          <Rest gameId={game.id} currentTime={game.time} mental={game.mental} />
         </div>
 
         {/* Center Group */}

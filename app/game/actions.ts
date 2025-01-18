@@ -51,7 +51,6 @@ export async function startNewGame(gameData: {
   // 새 게임 생성
   const { data: game, error } = await supabase
     .from('games')
-
     .insert([
       {
         user_id: user.id,
@@ -170,6 +169,7 @@ export async function updateGameAfterPerformance(
       fame: newFame,
     })
     .eq('id', gameId);
+
 
   if (error) return { error: error.message };
   return { success: true };
@@ -373,6 +373,43 @@ export async function updateGameAfterRepair(
   const { error } = await supabase
     .from('games')
     .update(updateFields)
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+export async function updateGameAfterRest(
+  gameId: string,
+  newTime: number,
+
+
+) {
+  const supabase = await createClient();
+
+  // 먼저 현재 게임 상태를 가져옵니다
+  const { data: currentGame } = await supabase
+    .from('games')
+    .select('mental')
+    .eq('id', gameId)
+    .single();
+
+  if (!currentGame) return { error: 'Game not found' };
+
+  // 새로운 값을 계산
+
+  const newMental = 100;
+
+
+
+  // 업데이트 수행
+  const { error } = await supabase
+    .from('games')
+    .update({
+
+      mental: newMental,
+      time: newTime,
+
+
+    })
     .eq('id', gameId);
 
   if (error) return { error: error.message };
