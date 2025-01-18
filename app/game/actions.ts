@@ -280,3 +280,101 @@ export async function updateGameAfterPurchase(
   if (error) return { error: error.message };
   return { success: true };
 }
+
+const validateRepairConditions = (
+  time: number,
+  money: number,
+  repairCost: number,
+  currentDurability: number
+) => {
+  const currentHour = time % 100;
+
+  if (currentHour < 9 || currentHour > 18) {
+    return {
+      isValid: false,
+      error: '상점은 9시부터 18시까지만 운영합니다.',
+    };
+  }
+
+  if (money < repairCost) {
+    return {
+      isValid: false,
+      error: '잔액이 부족합니다.',
+    };
+  }
+
+  if (currentDurability >= 100) {
+    return {
+      isValid: false,
+      error: '아이템이 온전한 상태입니다.',
+    };
+  }
+
+  return { isValid: true };
+};
+
+export async function updateGameAfterRepair(
+  gameId: string,
+  memberKey: string,
+  repairCost: number,
+  newDurability: number,
+  newTime: number
+) {
+  const supabase = await createClient();
+
+  // 현재 게임 상태 확인
+  const { data: currentGame } = await supabase
+    .from('games')
+    .select('*')
+    .eq('id', gameId)
+    .single();
+
+  if (!currentGame) return { error: 'Game not found' };
+
+  // 아이템 내구도 가져오기
+  const currentDurability =
+    memberKey === 'main'
+      ? currentGame.main_item_du
+      : currentGame[`mate${memberKey.slice(4)}_item_du` as keyof Game];
+
+  // 서버 사이드에서 조건 검증
+  const validation = validateRepairConditions(
+    currentGame.time,
+    currentGame.money,
+    repairCost,
+    currentDurability as number
+  );
+
+  if (!validation.isValid) {
+    return { error: validation.error };
+  }
+
+  // 업데이트할 필드 준비
+  let updateFields: Partial<Game> = {
+    money: currentGame.money - repairCost,
+    time: newTime,
+  };
+
+  // 멤버 키에 따라 업데이트할 필드 설정
+  if (memberKey === 'main') {
+    updateFields = {
+      ...updateFields,
+      main_item_du: newDurability,
+    };
+  } else {
+    const memberIndex = memberKey.slice(4);
+    updateFields = {
+      ...updateFields,
+      [`mate${memberIndex}_item_du`]: newDurability,
+    } as Partial<Game>;
+  }
+
+  // 업데이트 수행
+  const { error } = await supabase
+    .from('games')
+    .update(updateFields)
+    .eq('id', gameId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
