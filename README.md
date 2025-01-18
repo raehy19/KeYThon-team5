@@ -1,104 +1,82 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# Dream Chaser
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+어느 날, 낮잠에 깬 나는 라디오에서 들려온 코요테의 '꿈'이라는 노래를 듣게 된다.. 압도적인 무대와 목소리에 매료되었지만, 동시에 도전하고 싶다는 열망이 피어올랐다.
+그 순간, 코요테의 목소리가 들려왔다."최고가 되고 싶다면 날 이겨봐. 하지만 이 무대는 혼자서 오를 수 없어."
 
-## Features
+눈을 뜨자, 나는 낯선 세계의 작은 무대 위에 서 있었다. 코요테는 비웃으며 말했다. "나와 겨룰 준비가 되려면 네 팀을 꾸리고, 각자의 음악으로 세상을 흔들어 봐. 내 앞에 서기까지 얼마나 버틸 수 있을지 보자고."
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+나는 고개를 들고 외쳤다. "내 노래로 당신들을 넘어서고, 세계 최고의 가수가 될 거야!"
 
-## Demo
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
 
-## Deploy to Vercel
 
-Vercel deployment will guide you through creating a Supabase account and project.
+---
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+# Dream Chaser 🎤
 
-## Clone and run locally
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+## 🌟 소개
 
-2. Create a Next.js app using the Supabase Starter template npx command
+**Dream Chaser**는 당신만의 아이돌 그룹을 만들고 성장시키는 웹 기반 시뮬레이션 게임입니다.
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+> 어느 날, 낮잠에 깬 나는 라디오에서 들려온 코요테의 '꿈'이라는 노래를 듣게 된다.. 압도적인 무대와 목소리에 매료되었지만, 동시에 도전하고 싶다는 열망이 피어올랐다.
+> 
+> 그 순간, 코요테의 목소리가 들려왔다."최고가 되고 싶다면 날 이겨봐. 하지만 이 무대는 혼자서 오를 수 없어."
+> 
+> 눈을 뜨자, 나는 낯선 세계의 작은 무대 위에 서 있었다. 코요테는 비웃으며 말했다. "나와 겨룰 준비가 되려면 네 팀을 꾸리고, 각자의 음악으로 세상을 흔들어 봐. 내 앞에 서기까지 얼마나 버틸 수 있을지 보자고."
+> 
+> 나는 고개를 들고 외쳤다. "내 노래로 당신들을 넘어서고, 세계 최고의 가수가 될 거야!"
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+## 🎮 게임 특징
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+- **팀 관리**: 최대 5명의 멤버로 구성된 당신만의 팀을 만들고 관리하세요
+- **자원 관리**: 자금, 멘탈, 인지도를 전략적으로 관리하세요
+- **장비 시스템**: 각 멤버의 악기와 장비를 구매하고 관리하세요
+- **다양한 활동**: 알바, 공연, 연습 등 다양한 활동을 통해 팀을 성장시키세요
+- **랜덤 이벤트**: 예측할 수 없는 이벤트에 대처하며 게임을 진행하세요
+- **리더보드**: 다른 플레이어들과 경쟁하며 최고의 팀을 만드세요
 
-3. Use `cd` to change into the app's directory
+## 🛠 기술 스택
 
-   ```bash
-   cd with-supabase-app
-   ```
+- **Frontend**: Next.js 15, React, TypeScript, TailwindCSS, DaisyUI
+- **Backend**: Supabase (PostgreSQL, Authentication)
+- **Deployment**: Vercel
 
-4. Rename `.env.example` to `.env.local` and update the following:
+## 🎯 게임 목표
 
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
+20일 동안 당신의 팀을 성장시켜 최고의 아이돌 그룹으로 만드세요! 게임 종료 시 다음 요소들을 기준으로 평가됩니다:
 
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://app.supabase.com/project/_/settings/api)
+- 💰 보유 자금
+- 💪 팀 능력치
+- 🌟 인지도
 
-5. You can now run the Next.js local development server:
+## 🚀 주요 기능
 
-   ```bash
-   npm run dev
-   ```
+### 팀 관리
+- 멤버 영입과 관리
+- 개인 및 팀 능력치 향상
+- 장비 구매와 관리
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+### 활동
+- 알바: 자금 획득
+- 공연: 인지도 상승과 수익 창출
+- 연습: 능력치 향상
+- 휴식: 멘탈 회복
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+### 시스템
+- 실시간 시간 시스템
+- 랜덤 이벤트
+- 장비 내구도
+- 글로벌 리더보드
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+## 실행
+https://our-dream-teal.vercel.app/
 
-## Feedback and issues
+## 📝 라이선스
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
-
-## More Supabase examples
-
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+이 프로젝트는 MIT 라이선스를 따릅니다.
