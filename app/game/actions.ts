@@ -177,4 +177,41 @@ export async function updateGameAfterPerformance(
   return { success: true };
 }
 
+export async function updateGameAfterRest(
+  gameId: string,
+  newTime: number,
 
+
+) {
+  const supabase = await createClient();
+
+  // 먼저 현재 게임 상태를 가져옵니다
+  const { data: currentGame } = await supabase
+    .from('games')
+    .select('mental')
+    .eq('id', gameId)
+    .single();
+
+  if (!currentGame) return { error: 'Game not found' };
+
+  // 새로운 값을 계산
+
+  const newMental = 100;
+
+
+
+  // 업데이트 수행
+  const { error } = await supabase
+    .from('games')
+    .update({
+      
+      mental: newMental,
+      time: newTime,
+     
+
+    })
+    .eq('id', gameId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
