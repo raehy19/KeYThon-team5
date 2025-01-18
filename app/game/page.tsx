@@ -8,6 +8,7 @@ import Performance from './components/Performance';
 import Rest from '@/app/game/components/Rest';
 import ItemShop from '@/app/game/components/ItemShop';
 import RepairShop from '@/app/game/components/RepairShop';
+import AdventureModal from '@/app/game/components/AdventureModal';
 
 interface Character {
   name: string | null;
@@ -269,7 +270,7 @@ const GameContent: React.FC<{ game: Game }> = ({ game }) => {
 
         {/* Center Group */}
         <div className='flex gap-2'>
-          <button className='btn btn-warning'>모험하기</button>
+          <AdventureModal game={game} />
           <Performance
             gameId={game.id}
             currentTime={game.time}

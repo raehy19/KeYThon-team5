@@ -66,6 +66,29 @@ export async function startNewGame(gameData: {
   return { game };
 }
 
+// 팀 전체 능력치 계산 유틸리티 함수
+const calculateTeamPower = (game: Game): number => {
+  let totalPower =
+    game.main_power + (game.main_has_item ? game.main_item_power : 0);
+
+  // mate1부터 mate4까지 순회
+  for (let i = 1; i <= 4; i++) {
+    const matePrefix = `mate${i}_` as const;
+    const matePower = game[`${matePrefix}power` as keyof Game] as number;
+    const mateHasItem = game[`${matePrefix}has_item` as keyof Game] as boolean;
+    const mateItemPower = game[
+      `${matePrefix}item_power` as keyof Game
+    ] as number;
+
+    if (matePower) {
+      // mate가 존재하는 경우에만
+      totalPower += matePower + (mateHasItem ? mateItemPower : 0);
+    }
+  }
+
+  return totalPower;
+};
+
 function validateWorkConditions(time: number, mental: number) {
   const currentHour = time % 100;
 
@@ -118,8 +141,11 @@ export async function updateGameAfterWork(
   const timeToAdd = 6;
 
   let newTimeValue = currentGame.time + timeToAdd;
+  let shouldResetRandomDone = false;
+
   if (newTimeValue % 100 >= 24) {
     newTimeValue = Math.floor(newTimeValue / 100 + 1) * 100 + 8;
+    shouldResetRandomDone = true; // 날짜가 바뀌는 경우
   }
 
   // 업데이트 수행
@@ -129,13 +155,13 @@ export async function updateGameAfterWork(
       money: currentGame.money + moneyToAdd,
       mental: Math.max(currentGame.mental - mentalToDecrease, 0),
       time: newTimeValue,
+      random_done: shouldResetRandomDone ? false : undefined, // 날짜가 바뀌는 경우에만 false로 설정
     })
     .eq('id', gameId);
 
   if (error) return { error: error.message };
   return { success: true };
 }
-
 export async function updateGameAfterPerformance(
   gameId: string,
   moneyEarned: number,
@@ -145,36 +171,98 @@ export async function updateGameAfterPerformance(
 ) {
   const supabase = await createClient();
 
-  // 먼저 현재 게임 상태를 가져옵니다
+  // 현재 게임 상태를 가져옵니다
   const { data: currentGame } = await supabase
     .from('games')
-    .select('money, mental, fame')
+    .select('*') // 모든 필드를 가져오도록 변경
     .eq('id', gameId)
     .single();
 
   if (!currentGame) return { error: 'Game not found' };
 
+  let shouldResetRandomDone = false;
+
+  // 날짜가 바뀌는지 확인
+  if (Math.floor(newTime / 100) > Math.floor(currentGame.time / 100)) {
+    shouldResetRandomDone = true;
+  }
+
   // 새로운 값을 계산
   const newMoney = currentGame.money + moneyEarned;
-  const newMental = Math.max(currentGame.mental - mentalDecreased, 0); // 멘탈이 0 이하로 내려가지 않도록
+  const newMental = Math.max(currentGame.mental - mentalDecreased, 0);
   const newFame = currentGame.fame + Increasedfame;
+
+  // 업데이트할 필드 준비
+  let updateFields: Partial<Game> = {
+    money: newMoney,
+    mental: newMental,
+    time: newTime,
+    fame: newFame,
+    random_done: shouldResetRandomDone ? false : undefined,
+  };
+
+  // 메인 캐릭터의 악기 내구도 감소 처리
+  if (currentGame.main_has_item && currentGame.main_item_du > 0) {
+    const durabilityDecrease = Math.floor(Math.random() * 15) + 5; // 5-20 감소
+    const newDurability = currentGame.main_item_du - durabilityDecrease;
+
+    if (newDurability <= 0) {
+      // 악기 파괴
+      updateFields = {
+        ...updateFields,
+        main_has_item: false,
+        main_item_name: null,
+        main_item_power: 0,
+        main_item_du: 0,
+      };
+    } else {
+      // 내구도만 감소
+      updateFields.main_item_du = newDurability;
+    }
+  }
+
+  // 팀원들의 악기 내구도 감소 처리
+  for (let i = 1; i <= 4; i++) {
+    const matePrefix = `mate${i}_` as const;
+    const hasItem = currentGame[
+      `${matePrefix}has_item` as keyof Game
+    ] as boolean;
+    const itemDurability = currentGame[
+      `${matePrefix}item_du` as keyof Game
+    ] as number;
+
+    if (hasItem && itemDurability > 0) {
+      const durabilityDecrease = Math.floor(Math.random() * 15) + 5; // 5-20 감소
+      const newDurability = itemDurability - durabilityDecrease;
+
+      if (newDurability <= 0) {
+        // 악기 파괴
+        updateFields = {
+          ...updateFields,
+          [`${matePrefix}has_item`]: false,
+          [`${matePrefix}item_name`]: null,
+          [`${matePrefix}item_power`]: 0,
+          [`${matePrefix}item_du`]: 0,
+        } as Partial<Game>;
+      } else {
+        // 내구도만 감소
+        updateFields = {
+          ...updateFields,
+          [`${matePrefix}item_du`]: newDurability,
+        } as Partial<Game>;
+      }
+    }
+  }
 
   // 업데이트 수행
   const { error } = await supabase
     .from('games')
-    .update({
-      money: newMoney,
-      mental: newMental,
-      time: newTime,
-      fame: newFame,
-    })
+    .update(updateFields)
     .eq('id', gameId);
-
 
   if (error) return { error: error.message };
   return { success: true };
 }
-
 const validatePurchaseConditions = (
   time: number,
   money: number,
@@ -231,7 +319,7 @@ export async function updateGameAfterPurchase(
 
   if (!currentGame) return { error: 'Game not found' };
 
-  // 서버 사이드에서 조건 검증
+  // 조건 검증
   const validation = validatePurchaseConditions(
     currentGame.time,
     currentGame.money,
@@ -258,10 +346,8 @@ export async function updateGameAfterPurchase(
       main_item_du: itemDurability,
     };
   } else {
-    const memberIndex = memberKey.slice(4); // 'mate1' -> '1'
+    const memberIndex = memberKey.slice(4);
     const matePrefix = `mate${memberIndex}_` as const;
-
-    // 타입 안전한 업데이트 필드 생성
     updateFields = {
       ...updateFields,
       [`${matePrefix}has_item`]: true,
@@ -270,6 +356,10 @@ export async function updateGameAfterPurchase(
       [`${matePrefix}item_du`]: itemDurability,
     } as Partial<Game>;
   }
+
+  // 새로운 game state로 team_power 계산
+  const newGameState = { ...currentGame, ...updateFields };
+  updateFields.team_power = calculateTeamPower(newGameState);
 
   // 업데이트 수행
   const { error } = await supabase
@@ -370,48 +460,267 @@ export async function updateGameAfterRepair(
   }
 
   // 업데이트 수행
-  const { error } = await supabase
-    .from('games')
-    .update(updateFields)
+  const { error } = await supabase.from('games').update(updateFields);
   if (error) return { error: error.message };
   return { success: true };
 }
 
-export async function updateGameAfterRest(
-  gameId: string,
-  newTime: number,
-
-
-) {
+export async function updateGameAfterRest(gameId: string, newTime: number) {
   const supabase = await createClient();
 
-  // 먼저 현재 게임 상태를 가져옵니다
+  // 현재 게임 상태를 가져옵니다
   const { data: currentGame } = await supabase
     .from('games')
-    .select('mental')
+    .select('mental, time')
     .eq('id', gameId)
     .single();
 
   if (!currentGame) return { error: 'Game not found' };
 
-  // 새로운 값을 계산
+  let shouldResetRandomDone = false;
+  let finalNewTime = newTime;
 
-  const newMental = 100;
-
-
+  // 날짜가 바뀌는지 확인
+  if (Math.floor(finalNewTime / 100) > Math.floor(currentGame.time / 100)) {
+    shouldResetRandomDone = true;
+  }
 
   // 업데이트 수행
   const { error } = await supabase
     .from('games')
     .update({
-
-      mental: newMental,
-      time: newTime,
-
-
+      mental: 100,
+      time: finalNewTime,
+      random_done: shouldResetRandomDone ? false : undefined,
     })
     .eq('id', gameId);
 
   if (error) return { error: error.message };
   return { success: true };
+}
+
+// 랜덤 이름 생성 함수
+const generateRandomName = (): string => {
+  const firstNames = [
+    '김',
+    '이',
+    '박',
+    '최',
+    '정',
+    '강',
+    '조',
+    '윤',
+    '장',
+    '임',
+  ];
+  const lastNames = [
+    '준',
+    '민',
+    '서',
+    '지',
+    '현',
+    '우',
+    '영',
+    '수',
+    '호',
+    '아',
+  ];
+  const randomFirst = firstNames[Math.floor(Math.random() * firstNames.length)];
+  const randomLast = lastNames[Math.floor(Math.random() * lastNames.length)];
+  return randomFirst + randomLast + randomLast;
+};
+
+// 랜덤 포지션 생성
+const generateRandomPosition = (): string => {
+  const positions = ['보컬', '기타', '드럼', '키보드'];
+  return positions[Math.floor(Math.random() * positions.length)];
+};
+
+// 랜덤 능력치 생성 (20-50)
+const generateRandomPower = (): number => {
+  return Math.floor(Math.random() * 30) + 20;
+};
+
+// 이벤트 성공/실패 확률 계산
+const calculateEventSuccess = (probability: number = 0.7): boolean => {
+  return Math.random() < probability;
+};
+
+// 랜덤 곡 제목 생성
+const generateRandomSongTitle = (): string => {
+  const adjectives = [
+    '달콤한',
+    '차가운',
+    '뜨거운',
+    '푸른',
+    '붉은',
+    '검은',
+    '하얀',
+  ];
+  const nouns = ['사랑', '이별', '기억', '시간', '계절', '마음', '꿈'];
+  const randomAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+  return `${randomAdj} ${randomNoun}`;
+};
+
+export async function updateGameAfterAdventure(
+  gameId: string,
+  eventType: string,
+  eventParams: any
+) {
+  const supabase = await createClient();
+
+  // 현재 게임 상태 확인
+  const { data: currentGame } = await supabase
+    .from('games')
+    .select('*')
+    .eq('id', gameId)
+    .single();
+
+  if (!currentGame) return { error: 'Game not found' };
+
+  // 이미 오늘 모험을 완료했는지 확인
+  if (currentGame.random_done) {
+    return { error: '오늘은 이미 모험을 완료했습니다.' };
+  }
+
+  // 업데이트할 필드 준비
+  let updateFields: Partial<Game> = {
+    random_done: true,
+  };
+
+  // 이벤트 타입에 따른 처리
+  switch (eventType) {
+    case 'NEW_MEMBER': {
+      const success = calculateEventSuccess();
+      if (success && currentGame.number_of_team < 5) {
+        const nextMemberIndex = currentGame.number_of_team;
+        updateFields = {
+          ...updateFields,
+          number_of_team: currentGame.number_of_team + 1,
+          [`mate${nextMemberIndex}_name`]: generateRandomName(),
+          [`mate${nextMemberIndex}_job`]: generateRandomPosition(),
+          [`mate${nextMemberIndex}_power`]: generateRandomPower(),
+          [`mate${nextMemberIndex}_has_item`]: false,
+          mental: Math.min(currentGame.mental + 10, 100),
+        } as Partial<Game>;
+
+        // 새로운 game state로 team_power 계산
+        const newGameState = { ...currentGame, ...updateFields };
+        updateFields.team_power = calculateTeamPower(newGameState);
+      } else {
+        updateFields.mental = Math.max(currentGame.mental - 10, 0);
+      }
+      break;
+    }
+
+    case 'INSTRUMENT_BREAK': {
+      const { memberKey } = eventParams;
+      const currentDurability =
+        memberKey === 'main'
+          ? currentGame.main_item_du
+          : currentGame[`${memberKey}_item_du` as keyof Game];
+      const newDurability = (currentDurability as number) - 40;
+
+      if (memberKey === 'main') {
+        updateFields = {
+          ...updateFields,
+          mental: Math.max(currentGame.mental - 20, 0),
+          main_power: currentGame.main_power + 20,
+          main_item_du: newDurability,
+        };
+        if (newDurability <= 0) {
+          updateFields = {
+            ...updateFields,
+            main_has_item: false,
+            main_item_name: null,
+            main_item_power: 0,
+            main_item_du: 0,
+          };
+        }
+      } else {
+        const memberIndex = memberKey.slice(4);
+        updateFields = {
+          ...updateFields,
+          mental: Math.max(currentGame.mental - 20, 0),
+          [`mate${memberIndex}_power`]:
+            (currentGame[`mate${memberIndex}_power` as keyof Game] as number) +
+            20,
+          [`mate${memberIndex}_item_du`]: newDurability,
+        } as Partial<Game>;
+
+        if (newDurability <= 0) {
+          updateFields = {
+            ...updateFields,
+            [`mate${memberIndex}_has_item`]: false,
+            [`mate${memberIndex}_item_name`]: null,
+            [`mate${memberIndex}_item_power`]: 0,
+            [`mate${memberIndex}_item_du`]: 0,
+          } as Partial<Game>;
+        }
+      }
+
+      // 새로운 game state로 team_power 계산
+      const newGameState = { ...currentGame, ...updateFields };
+      updateFields.team_power = calculateTeamPower(newGameState);
+      break;
+    }
+
+    case 'ACCIDENT': {
+      const { memberKey } = eventParams;
+      const memberIndex = memberKey.slice(4);
+      updateFields = {
+        ...updateFields,
+        mental: Math.max(currentGame.mental - 30, 0),
+        number_of_team: currentGame.number_of_team - 1,
+        [`mate${memberIndex}_name`]: null,
+        [`mate${memberIndex}_job`]: null,
+        [`mate${memberIndex}_power`]: 0,
+        [`mate${memberIndex}_has_item`]: false,
+        [`mate${memberIndex}_item_name`]: null,
+        [`mate${memberIndex}_item_power`]: 0,
+        [`mate${memberIndex}_item_du`]: 0,
+      } as Partial<Game>;
+      break;
+    }
+
+    case 'DONATION': {
+      const donationAmount = Math.floor(Math.random() * 50 + 50); // 50-100만원
+      updateFields = {
+        ...updateFields,
+        mental: Math.min(currentGame.mental + 10, 100),
+        money: currentGame.money + donationAmount,
+      };
+      break;
+    }
+
+    case 'HIT_SONG': {
+      updateFields = {
+        ...updateFields,
+        mental: 100,
+        fame: currentGame.fame + 100,
+      };
+      break;
+    }
+
+    case 'CONCERT': {
+      const mentalChange = Math.floor(Math.random() * 40) - 20; // -20 ~ +20
+      const fameChange = Math.floor(Math.random() * 60) - 30; // -30 ~ +30
+      updateFields = {
+        ...updateFields,
+        mental: Math.max(0, Math.min(100, currentGame.mental + mentalChange)),
+        fame: Math.max(0, currentGame.fame + fameChange),
+      };
+      break;
+    }
+  }
+
+  // 업데이트 수행
+  const { error } = await supabase
+    .from('games')
+    .update(updateFields)
+    .eq('id', gameId);
+
+  if (error) return { error: error.message };
+  return { success: true, eventResult: updateFields };
 }
