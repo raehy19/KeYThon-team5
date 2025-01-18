@@ -130,8 +130,12 @@ export default async function GamePage() {
             <p className='text-xl font-bold'>{game.fame}%</p>
           </div>
           <div>
-            <p className='text-gray-600'>시간</p>
+            <p className='text-gray-600'>날짜</p>
             <p className='text-xl font-bold'>{game.time}일차</p>
+          </div>
+          <div>
+            <p className='text-gray-600'>시간</p>
+            <p className='text-xl font-bold'>{game.time}시</p>
           </div>
         </div>
       </div>
