@@ -1,24 +1,32 @@
-import { createClient } from '@/utils/supabase/server';
-import { redirect } from 'next/navigation';
+// app/game/page.tsx
+import { getCurrentGame } from './actions';
+import StartGameForm from '@/components/StartGameForm';
 
 export default async function GamePage() {
-  const supabase = await createClient();
+  const { game, error } = await getCurrentGame();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
-  if (!user) {
-    return redirect('/sign-in');
+  if (!game) {
+    return (
+      <div className='max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow'>
+        <h1 className='text-2xl font-bold mb-6'>새 게임 시작</h1>
+        <StartGameForm />
+      </div>
+    );
   }
 
   return (
-    <div className='flex-1 w-full flex flex-col gap-12'>
-      <div className='flex flex-col gap-2 items-start'>
-        <h2 className='font-bold text-2xl mb-4'>Your user details</h2>
-        <pre className='text-xs font-mono p-3 rounded border max-h-32 overflow-auto'>
-          {JSON.stringify(user, null, 2)}
-        </pre>
+    <div className='max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow'>
+      <h1 className='text-2xl font-bold mb-6'>현재 게임 상태</h1>
+      <div className='space-y-4'>
+        <p>이름: {game.main_name}</p>
+        <p>포지션: {game.main_job}</p>
+        <p>자금: {game.money}만원</p>
+        <p>멘탈: {game.mental}%</p>
+        <p>인지도: {game.fame}%</p>
       </div>
     </div>
   );
