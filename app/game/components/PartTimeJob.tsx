@@ -27,7 +27,7 @@ export default function PartTimeJob({
   const startWork = () => {
     const currentHour = getHour(currentTime);
 
-    if (currentHour >= 18) {
+    if (currentHour > 18) {
       setError('너무 늦은 시간이라 알바를 할 수 없습니다.');
       return;
     }
@@ -66,7 +66,6 @@ export default function PartTimeJob({
       newTime = getNextDayTime(newTime);
     }
 
-    // async/await 대신 Promise 체이닝 사용
     updateGameAfterWork(gameId, moneyEarned, mentalDecreased, newTime)
       .then(() => {
         setIsModalOpen(false);

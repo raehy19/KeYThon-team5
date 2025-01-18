@@ -1,9 +1,9 @@
-import { getCurrentGame, updateGameAfterWork } from './actions';
+import { getCurrentGame } from './actions';
 import StartGameForm from '@/components/StartGameForm';
 import { formatGameTime } from '@/utils/time';
 import PartTimeJob from './components/PartTimeJob';
+import Performance from './components/Performance';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 
 // 팀원 정보를 보여주는 컴포넌트
 function TeamMateInfo({
@@ -140,11 +140,20 @@ export default async function GamePage() {
 
       {/* 액션 영역 */}
       <div className='mt-8'>
-        <PartTimeJob
-          gameId={game.id}
-          currentTime={game.time}
-          mental={game.mental}
-        />
+        <h2 className='text-xl font-bold mb-4'>작업 선택</h2>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          <PartTimeJob
+            gameId={game.id}
+            currentTime={game.time}
+            mental={game.mental}
+          />
+          <Performance
+            gameId={game.id}
+            currentTime={game.time}
+            mental={game.mental}
+            fame={game.fame}
+          />
+        </div>
       </div>
 
       {/* 메인 캐릭터 정보 */}
@@ -185,6 +194,7 @@ export default async function GamePage() {
         <div className='mb-2'>
           <p>팀원 수: {game.number_of_team}</p>
           <p>팀 총 능력치: {game.team_power}</p>
+          <p>명성: {game.fame}</p>
         </div>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           {teammates.map(
