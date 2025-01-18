@@ -2,6 +2,7 @@
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
+import { Game } from './page';
 
 export async function getCurrentGame() {
   const supabase = await createClient();
@@ -68,7 +69,7 @@ export async function startNewGame(gameData: {
 function validateWorkConditions(time: number, mental: number) {
   const currentHour = time % 100;
 
-  if (currentHour >= 18) {
+  if (currentHour > 18) {
     return {
       isValid: false,
       error: '너무 늦은 시간이라 알바를 할 수 없습니다.',
@@ -135,14 +136,12 @@ export async function updateGameAfterWork(
   return { success: true };
 }
 
-
 export async function updateGameAfterPerformance(
   gameId: string,
   moneyEarned: number,
   mentalDecreased: number,
   newTime: number,
   Increasedfame: number
-
 ) {
   const supabase = await createClient();
 
@@ -160,7 +159,6 @@ export async function updateGameAfterPerformance(
   const newMental = Math.max(currentGame.mental - mentalDecreased, 0); // 멘탈이 0 이하로 내려가지 않도록
   const newFame = currentGame.fame + Increasedfame;
 
-
   // 업데이트 수행
   const { error } = await supabase
     .from('games')
@@ -169,10 +167,212 @@ export async function updateGameAfterPerformance(
       mental: newMental,
       time: newTime,
       fame: newFame,
-
     })
     .eq('id', gameId);
 
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+const validatePurchaseConditions = (
+  time: number,
+  money: number,
+  price: number
+) => {
+  const currentHour = time % 100;
+
+  if (currentHour < 9 || currentHour > 18) {
+    return {
+      isValid: false,
+      error: '상점은 9시부터 18시까지만 운영합니다.',
+    };
+  }
+
+  if (money < price) {
+    return {
+      isValid: false,
+      error: '잔액이 부족합니다.',
+    };
+  }
+
+  return { isValid: true };
+};
+
+export async function updateGameTime(gameId: string, newTime: number) {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('games')
+    .update({ time: newTime })
+    .eq('id', gameId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+export async function updateGameAfterPurchase(
+  gameId: string,
+  memberKey: string,
+  itemName: string,
+  itemPower: number,
+  itemDurability: number,
+  price: number,
+  newTime: number
+) {
+  const supabase = await createClient();
+
+  // 현재 게임 상태 확인
+  const { data: currentGame } = await supabase
+    .from('games')
+    .select('*')
+    .eq('id', gameId)
+    .single();
+
+  if (!currentGame) return { error: 'Game not found' };
+
+  // 서버 사이드에서 조건 검증
+  const validation = validatePurchaseConditions(
+    currentGame.time,
+    currentGame.money,
+    price
+  );
+
+  if (!validation.isValid) {
+    return { error: validation.error };
+  }
+
+  // 업데이트할 필드 준비
+  let updateFields: Partial<Game> = {
+    money: currentGame.money - price,
+    time: newTime,
+  };
+
+  // 멤버 키에 따라 업데이트할 필드 설정
+  if (memberKey === 'main') {
+    updateFields = {
+      ...updateFields,
+      main_has_item: true,
+      main_item_name: itemName,
+      main_item_power: itemPower,
+      main_item_du: itemDurability,
+    };
+  } else {
+    const memberIndex = memberKey.slice(4); // 'mate1' -> '1'
+    const matePrefix = `mate${memberIndex}_` as const;
+
+    // 타입 안전한 업데이트 필드 생성
+    updateFields = {
+      ...updateFields,
+      [`${matePrefix}has_item`]: true,
+      [`${matePrefix}item_name`]: itemName,
+      [`${matePrefix}item_power`]: itemPower,
+      [`${matePrefix}item_du`]: itemDurability,
+    } as Partial<Game>;
+  }
+
+  // 업데이트 수행
+  const { error } = await supabase
+    .from('games')
+    .update(updateFields)
+    .eq('id', gameId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
+
+const validateRepairConditions = (
+  time: number,
+  money: number,
+  repairCost: number,
+  currentDurability: number
+) => {
+  const currentHour = time % 100;
+
+  if (currentHour < 9 || currentHour > 18) {
+    return {
+      isValid: false,
+      error: '상점은 9시부터 18시까지만 운영합니다.',
+    };
+  }
+
+  if (money < repairCost) {
+    return {
+      isValid: false,
+      error: '잔액이 부족합니다.',
+    };
+  }
+
+  if (currentDurability >= 100) {
+    return {
+      isValid: false,
+      error: '아이템이 온전한 상태입니다.',
+    };
+  }
+
+  return { isValid: true };
+};
+
+export async function updateGameAfterRepair(
+  gameId: string,
+  memberKey: string,
+  repairCost: number,
+  newDurability: number,
+  newTime: number
+) {
+  const supabase = await createClient();
+
+  // 현재 게임 상태 확인
+  const { data: currentGame } = await supabase
+    .from('games')
+    .select('*')
+    .eq('id', gameId)
+    .single();
+
+  if (!currentGame) return { error: 'Game not found' };
+
+  // 아이템 내구도 가져오기
+  const currentDurability =
+    memberKey === 'main'
+      ? currentGame.main_item_du
+      : currentGame[`mate${memberKey.slice(4)}_item_du` as keyof Game];
+
+  // 서버 사이드에서 조건 검증
+  const validation = validateRepairConditions(
+    currentGame.time,
+    currentGame.money,
+    repairCost,
+    currentDurability as number
+  );
+
+  if (!validation.isValid) {
+    return { error: validation.error };
+  }
+
+  // 업데이트할 필드 준비
+  let updateFields: Partial<Game> = {
+    money: currentGame.money - repairCost,
+    time: newTime,
+  };
+
+  // 멤버 키에 따라 업데이트할 필드 설정
+  if (memberKey === 'main') {
+    updateFields = {
+      ...updateFields,
+      main_item_du: newDurability,
+    };
+  } else {
+    const memberIndex = memberKey.slice(4);
+    updateFields = {
+      ...updateFields,
+      [`mate${memberIndex}_item_du`]: newDurability,
+    } as Partial<Game>;
+  }
+
+  // 업데이트 수행
+  const { error } = await supabase
+    .from('games')
+    .update(updateFields)
   if (error) return { error: error.message };
   return { success: true };
 }
@@ -204,10 +404,10 @@ export async function updateGameAfterRest(
   const { error } = await supabase
     .from('games')
     .update({
-      
+
       mental: newMental,
       time: newTime,
-     
+
 
     })
     .eq('id', gameId);
