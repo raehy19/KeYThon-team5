@@ -50,6 +50,7 @@ export default function Rest({
   };
 
   const completeWork = () => {
+    const Increasedmental = Math.floor(Math.random() * 10) + 5;
     
 
     let newTime = currentTime + 6;
@@ -57,7 +58,7 @@ export default function Rest({
       newTime = getNextDayTime(newTime);
     }
 
-    updateGameAfterRest(gameId, newTime)
+    updateGameAfterRest(gameId, newTime, Increasedmental)
       .then(() => {
         setIsModalOpen(false);
         setProgress(0);
