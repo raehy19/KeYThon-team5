@@ -1,7 +1,9 @@
-// app/game/page.tsx
-import { getCurrentGame } from './actions';
+import { getCurrentGame, updateGameAfterWork } from './actions';
 import StartGameForm from '@/components/StartGameForm';
+import { formatGameTime } from '@/utils/time';
+import PartTimeJob from './components/PartTimeJob';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 // 팀원 정보를 보여주는 컴포넌트
 function TeamMateInfo({
@@ -131,9 +133,18 @@ export default async function GamePage() {
           </div>
           <div>
             <p className='text-gray-600'>시간</p>
-            <p className='text-xl font-bold'>{game.time}일차</p>
+            <p className='text-xl font-bold'>{formatGameTime(game.time)}</p>
           </div>
         </div>
+      </div>
+
+      {/* 액션 영역 */}
+      <div className='mt-8'>
+        <PartTimeJob
+          gameId={game.id}
+          currentTime={game.time}
+          mental={game.mental}
+        />
       </div>
 
       {/* 메인 캐릭터 정보 */}

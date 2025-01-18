@@ -64,3 +64,38 @@ export async function startNewGame(gameData: {
   if (error) return { error: error.message };
   return { game };
 }
+
+export async function updateGameAfterWork(
+  gameId: string,
+  moneyEarned: number,
+  mentalDecreased: number,
+  newTime: number
+) {
+  const supabase = await createClient();
+
+  // 먼저 현재 게임 상태를 가져옵니다
+  const { data: currentGame } = await supabase
+    .from('games')
+    .select('money, mental')
+    .eq('id', gameId)
+    .single();
+
+  if (!currentGame) return { error: 'Game not found' };
+
+  // 새로운 값을 계산
+  const newMoney = currentGame.money + moneyEarned;
+  const newMental = Math.max(currentGame.mental - mentalDecreased, 0); // 멘탈이 0 이하로 내려가지 않도록
+
+  // 업데이트 수행
+  const { error } = await supabase
+    .from('games')
+    .update({
+      money: newMoney,
+      mental: newMental,
+      time: newTime,
+    })
+    .eq('id', gameId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
