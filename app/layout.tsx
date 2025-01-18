@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang='en' className={geistSans.className} suppressHydrationWarning>
       <body className='bg-background text-foreground'>
-        <main className='min-h-screen flex flex-col items-center'>
+        <main className='min-h-screen flex flex-col items-center min-w-[1000px]'>
           {/* 헤더 네비게이션을 fixed로 설정하고 배경색 추가 */}
           <nav className='fixed top-0 left-0 right-0 flex justify-center border-b border-b-foreground/10 h-16 bg-background z-50'>
             <div className='w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm'>
