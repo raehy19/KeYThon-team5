@@ -10,6 +10,7 @@ import ItemShop from '@/app/game/components/ItemShop';
 import RepairShop from '@/app/game/components/RepairShop';
 import AdventureModal from '@/app/game/components/AdventureModal';
 import Practice from '@/app/game/components/Practice';
+import EndGameButton from '@/app/game/components/EndGameButton';
 
 interface Character {
   name: string | null;
@@ -204,6 +205,7 @@ const GameContent: React.FC<{ game: Game }> = ({ game }) => {
             <div className='stat-title'>시간</div>
             <div className='stat-value'>{formatGameTime(game.time)}</div>
           </div>
+          <EndGameButton gameId={game.id} />
         </div>
       </div>
 

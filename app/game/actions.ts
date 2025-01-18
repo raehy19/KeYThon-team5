@@ -853,3 +853,91 @@ export async function updateGameAfterPractice(
   if (error) return { error: error.message };
   return { success: true };
 }
+
+////////////
+
+export interface LeaderboardEntry {
+  id: string;
+  email: string;
+  player_name: string;
+  money: number;
+  team_power: number;
+  fame: number;
+  created_at: string;
+}
+
+export async function saveToLeaderboard(
+  gameId: string,
+  forced: boolean = false
+) {
+  const supabase = await createClient();
+
+  // 현재 게임 상태 확인
+  const { data: game, error: gameError } = await supabase
+    .from('games')
+    .select('*')
+    .eq('id', gameId)
+    .single();
+
+  if (gameError || !game) {
+    return { error: 'Game not found' };
+  }
+
+  // 20일차 체크 (강제 종료가 아닌 경우)
+  const currentDay = Math.floor(game.time / 100);
+  if (!forced && currentDay < 20) {
+    return { error: '아직 20일차가 되지 않았습니다.' };
+  }
+
+  // 유저 정보 가져오기
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return { error: 'User not found' };
+  }
+
+  // 리더보드에 기록
+  const { error: insertError } = await supabase.from('leaderboard').insert([
+    {
+      email: user.email,
+      player_name: game.main_name,
+      money: game.money,
+      team_power: game.team_power,
+      fame: game.fame,
+    },
+  ]);
+
+  if (insertError) {
+    return { error: insertError.message };
+  }
+
+  // 게임 종료 상태로 변경
+  const { error: updateError } = await supabase
+    .from('games')
+    .update({ is_playing: false })
+    .eq('id', gameId);
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  return { success: true };
+}
+
+export async function getLeaderboard() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('leaderboard')
+    .select('*')
+    .order('fame', { ascending: false })
+    .limit(20);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { data };
+}
