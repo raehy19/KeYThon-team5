@@ -1,4 +1,4 @@
-// app/game/components/InstrumentShop.tsx
+// app/game/components/ItemShop.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,11 +7,11 @@ import { getHour } from '@/utils/time';
 import { updateGameAfterPurchase, updateGameTime } from '../actions';
 import { Game } from '../page';
 
-interface InstrumentShopProps {
+interface ItemShopProps {
   game: Game;
 }
 
-interface Instrument {
+interface Item {
   name: string;
   power: number;
   price: number;
@@ -25,7 +25,7 @@ interface MemberData {
   itemPower: number;
 }
 
-const getInstrumentName = (job: string | null): string[] => {
+const getItemName = (job: string | null): string[] => {
   switch (job) {
     case '보컬':
       return ['프리미엄 마이크', '스튜디오 마이크', '무선 마이크'];
@@ -42,8 +42,8 @@ const getInstrumentName = (job: string | null): string[] => {
   }
 };
 
-const generateInstruments = (job: string | null): Instrument[] => {
-  const names = getInstrumentName(job);
+const generateItems = (job: string | null): Item[] => {
+  const names = getItemName(job);
   return names.map((name) => {
     const power = Math.floor(Math.random() * 30) + 20; // 20-50 power
     return {
@@ -74,11 +74,11 @@ const getMemberData = (game: Game, memberKey: string): MemberData => {
   };
 };
 
-export default function InstrumentShop({ game }: InstrumentShopProps) {
+export default function ItemShop({ game }: ItemShopProps) {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState('main');
-  const [instruments, setInstruments] = useState<Instrument[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const closeShop = async () => {
@@ -102,13 +102,13 @@ export default function InstrumentShop({ game }: InstrumentShopProps) {
     }
 
     const memberData = getMemberData(game, selectedMember);
-    setInstruments(generateInstruments(memberData.job));
+    setItems(generateItems(memberData.job));
     setIsModalOpen(true);
     setError(null);
   };
 
-  const handlePurchase = async (instrument: Instrument) => {
-    if (game.money < instrument.price) {
+  const handlePurchase = async (item: Item) => {
+    if (game.money < item.price) {
       setError('잔액이 부족합니다.');
       return;
     }
@@ -118,16 +118,16 @@ export default function InstrumentShop({ game }: InstrumentShopProps) {
       await updateGameAfterPurchase(
         game.id,
         selectedMember,
-        instrument.name,
-        instrument.power,
+        item.name,
+        item.power,
         100, // 내구도
-        instrument.price,
+        item.price,
         newTime
       );
       setIsModalOpen(false);
       router.refresh();
     } catch (error) {
-      console.error('Error purchasing instrument:', error);
+      console.error('Error purchasing item:', error);
       setError('구매 처리 중 오류가 발생했습니다.');
     }
   };
@@ -159,7 +159,7 @@ export default function InstrumentShop({ game }: InstrumentShopProps) {
                 onChange={(e) => {
                   setSelectedMember(e.target.value);
                   const memberData = getMemberData(game, e.target.value);
-                  setInstruments(generateInstruments(memberData.job));
+                  setItems(generateItems(memberData.job));
                 }}
                 className='mt-1 block w-full rounded border-gray-300'
               >
@@ -188,23 +188,23 @@ export default function InstrumentShop({ game }: InstrumentShopProps) {
             </div>
 
             <div className='space-y-4'>
-              {instruments.map((instrument, index) => (
+              {items.map((item, index) => (
                 <div
                   key={index}
                   className='border p-4 rounded flex justify-between items-center'
                 >
                   <div>
-                    <p className='font-medium'>{instrument.name}</p>
+                    <p className='font-medium'>{item.name}</p>
                     <p className='text-sm text-gray-600'>
-                      능력치: {instrument.power}
+                      능력치: {item.power}
                     </p>
                     <p className='text-sm text-gray-600'>
-                      가격: {instrument.price.toLocaleString()}원
+                      가격: {item.price.toLocaleString()}원
                     </p>
                   </div>
                   <button
-                    onClick={() => handlePurchase(instrument)}
-                    disabled={game.money < instrument.price}
+                    onClick={() => handlePurchase(item)}
+                    disabled={game.money < item.price}
                     className='px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600
                              disabled:bg-gray-400 disabled:cursor-not-allowed'
                   >

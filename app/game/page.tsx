@@ -5,7 +5,7 @@ import StartGameForm from '@/components/StartGameForm';
 import { formatGameTime } from '@/utils/time';
 import PartTimeJob from './components/PartTimeJob';
 import Performance from './components/Performance';
-import InstrumentShop from '@/app/game/components/InstrumentShop';
+import ItemShop from '@/app/game/components/ItemShop';
 interface Character {
   name: string | null;
   img: string | null;
@@ -277,7 +277,7 @@ const GameContent: React.FC<{ game: Game }> = ({ game }) => {
 
         {/* Right Group */}
         <div className='flex gap-2'>
-          <InstrumentShop game={game} />
+          <ItemShop game={game} />
           <button className='btn btn-primary'>아이템 수리</button>
         </div>
       </div>
