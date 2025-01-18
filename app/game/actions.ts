@@ -380,6 +380,7 @@ export async function updateGameAfterRepair(
 export async function updateGameAfterRest(
   gameId: string,
   newTime: number,
+  Increasedmental: number,
 
 
 ) {
@@ -396,7 +397,7 @@ export async function updateGameAfterRest(
 
   // 새로운 값을 계산
 
-  const newMental = 100;
+  const newMental = Math.min(currentGame.mental + Increasedmental, 100);
 
 
 
