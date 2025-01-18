@@ -277,6 +277,7 @@ const GameContent: React.FC<{ game: Game }> = ({ game }) => {
             currentTime={game.time}
             mental={game.mental}
             fame={game.fame}
+            teamPower={game.team_power}
           />
           <Practice gameId={game.id} currentTime={game.time} />
         </div>

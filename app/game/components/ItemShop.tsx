@@ -242,7 +242,7 @@ export default function ItemShop({ game }: ItemShopProps) {
 
             <div className='mb-4'>
               <p className='text-sm text-gray-600'>
-                현재 잔액: {game.money.toLocaleString()}원
+                현재 잔액: {game.money.toLocaleString()}만 원
               </p>
               {getMemberData(game, selectedMember).hasItem && (
                 <p className='text-sm text-gray-600'>
@@ -264,7 +264,7 @@ export default function ItemShop({ game }: ItemShopProps) {
                       능력치: {item.power}
                     </p>
                     <p className='text-sm text-gray-600'>
-                      가격: {item.price.toLocaleString()}원
+                      가격: {item.price.toLocaleString()}만 원
                     </p>
                   </div>
                   <button

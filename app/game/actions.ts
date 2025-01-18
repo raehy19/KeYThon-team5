@@ -162,6 +162,7 @@ export async function updateGameAfterWork(
   if (error) return { error: error.message };
   return { success: true };
 }
+
 export async function updateGameAfterPerformance(
   gameId: string,
   moneyEarned: number,
@@ -201,13 +202,12 @@ export async function updateGameAfterPerformance(
     random_done: shouldResetRandomDone ? false : undefined,
   };
 
-  // 메인 캐릭터의 악기 내구도 감소 처리
+  // 악기 내구도 감소 처리 (메인 캐릭터)
   if (currentGame.main_has_item && currentGame.main_item_du > 0) {
-    const durabilityDecrease = Math.floor(Math.random() * 15) + 5; // 5-20 감소
+    const durabilityDecrease = Math.floor(Math.random() * 10) + 5; // 5-15 감소
     const newDurability = currentGame.main_item_du - durabilityDecrease;
 
     if (newDurability <= 0) {
-      // 악기 파괴
       updateFields = {
         ...updateFields,
         main_has_item: false,
@@ -216,7 +216,6 @@ export async function updateGameAfterPerformance(
         main_item_du: 0,
       };
     } else {
-      // 내구도만 감소
       updateFields.main_item_du = newDurability;
     }
   }
@@ -232,11 +231,10 @@ export async function updateGameAfterPerformance(
     ] as number;
 
     if (hasItem && itemDurability > 0) {
-      const durabilityDecrease = Math.floor(Math.random() * 15) + 5; // 5-20 감소
+      const durabilityDecrease = Math.floor(Math.random() * 10) + 5;
       const newDurability = itemDurability - durabilityDecrease;
 
       if (newDurability <= 0) {
-        // 악기 파괴
         updateFields = {
           ...updateFields,
           [`${matePrefix}has_item`]: false,
@@ -245,7 +243,6 @@ export async function updateGameAfterPerformance(
           [`${matePrefix}item_du`]: 0,
         } as Partial<Game>;
       } else {
-        // 내구도만 감소
         updateFields = {
           ...updateFields,
           [`${matePrefix}item_du`]: newDurability,
@@ -263,6 +260,7 @@ export async function updateGameAfterPerformance(
   if (error) return { error: error.message };
   return { success: true };
 }
+
 const validatePurchaseConditions = (
   time: number,
   money: number,
