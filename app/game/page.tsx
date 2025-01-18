@@ -4,7 +4,7 @@ import { getCurrentGame, updateGameAfterWork } from './actions';
 import StartGameForm from '@/components/StartGameForm';
 import { formatGameTime } from '@/utils/time';
 import PartTimeJob from './components/PartTimeJob';
-
+import Performance from './components/Performance';
 interface Character {
   name: string | null;
   img: string | null;
@@ -265,7 +265,12 @@ const GameContent: React.FC<{ game: Game }> = ({ game }) => {
         {/* Center Group */}
         <div className='flex gap-2'>
           <button className='btn btn-warning'>모험하기</button>
-          <button className='btn btn-error'>공연하기</button>
+          <Performance
+            gameId={game.id}
+            currentTime={game.time}
+            mental={game.mental}
+            fame={game.fame}
+          />
           <button className='btn btn-neutral'>연습하기</button>
         </div>
 
