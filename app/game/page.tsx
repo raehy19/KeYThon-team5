@@ -71,7 +71,6 @@ interface CharacterStatsProps {
   character: Character;
   isMain?: boolean;
 }
-
 const CharacterStats: React.FC<CharacterStatsProps> = ({
   character,
   isMain = false,
@@ -80,7 +79,7 @@ const CharacterStats: React.FC<CharacterStatsProps> = ({
     <div className='flex flex-col items-center'>
       <div className={`relative ${isMain ? 'w-40 h-40' : 'w-32 h-32'} mb-4`}>
         <Image
-          src={character.img || '/api/placeholder/128/128'}
+          src={character.img || '/img/v1.png'}
           alt={character.name || ''}
           fill
           className='object-cover'
@@ -110,6 +109,7 @@ const CharacterStats: React.FC<CharacterStatsProps> = ({
     </div>
   );
 };
+
 const GameContent: React.FC<{ game: Game }> = ({ game }) => {
   // 팀원 데이터 구성
   const teammates = [
@@ -200,81 +200,80 @@ const GameContent: React.FC<{ game: Game }> = ({ game }) => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className='flex items-end'>
-        {/* Left Sidebar */}
-        <div className='w-32 space-y-4'>
+      {/* Main Content - Characters */}
+      <div className='flex-1 px-8 flex items-center'>
+        <div className='flex justify-center items-start gap-8 w-full'>
+          {game.mate1_name && (
+            <CharacterStats
+              character={{
+                name: game.mate1_name,
+                img: game.mate1_img,
+                job: game.mate1_job,
+                power: game.mate1_power,
+                has_item: game.mate1_has_item,
+                item_name: game.mate1_item_name,
+                item_power: game.mate1_item_power,
+                item_du: game.mate1_item_du,
+              }}
+            />
+          )}
+
+          {/* Main Character */}
+          <CharacterStats
+            character={{
+              name: game.main_name,
+              img: game.main_img,
+              job: game.main_job,
+              power: game.main_power,
+              has_item: game.main_has_item,
+              item_name: game.main_item_name,
+              item_power: game.main_item_power,
+              item_du: game.main_item_du,
+            }}
+            isMain={true}
+          />
+
+          {game.mate2_name && (
+            <CharacterStats
+              character={{
+                name: game.mate2_name,
+                img: game.mate2_img,
+                job: game.mate2_job,
+                power: game.mate2_power,
+                has_item: game.mate2_has_item,
+                item_name: game.mate2_item_name,
+                item_power: game.mate2_item_power,
+                item_du: game.mate2_item_du,
+              }}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Bottom Action Buttons */}
+      <div className='mt-4 flex justify-between items-center gap-4'>
+        {/* Left Group */}
+        <div className='flex gap-2'>
           <PartTimeJob
             gameId={game.id}
             currentTime={game.time}
             mental={game.mental}
           />
-          <button className='btn btn-success w-full'>휴식하기</button>
-          <button className='btn btn-warning w-full'>랜덤 이벤트</button>
-          <button className='btn btn-error w-full'>공연하기</button>
+          <button className='btn btn-success'>휴식하기</button>
         </div>
 
-        {/* Center Content - Characters */}
-        <div className='flex-1 px-8'>
-          <div className='flex justify-center items-start gap-8'>
-            {game.mate1_name && (
-              <CharacterStats
-                character={{
-                  name: game.mate1_name,
-                  img: game.mate1_img,
-                  job: game.mate1_job,
-                  power: game.mate1_power,
-                  has_item: game.mate1_has_item,
-                  item_name: game.mate1_item_name,
-                  item_power: game.mate1_item_power,
-                  item_du: game.mate1_item_du,
-                }}
-              />
-            )}
-
-            {/* Main Character */}
-            <CharacterStats
-              character={{
-                name: game.main_name,
-                img: game.main_img,
-                job: game.main_job,
-                power: game.main_power,
-                has_item: game.main_has_item,
-                item_name: game.main_item_name,
-                item_power: game.main_item_power,
-                item_du: game.main_item_du,
-              }}
-              isMain={true}
-            />
-
-            {game.mate2_name && (
-              <CharacterStats
-                character={{
-                  name: game.mate2_name,
-                  img: game.mate2_img,
-                  job: game.mate2_job,
-                  power: game.mate2_power,
-                  has_item: game.mate2_has_item,
-                  item_name: game.mate2_item_name,
-                  item_power: game.mate2_item_power,
-                  item_du: game.mate2_item_du,
-                }}
-              />
-            )}
-          </div>
+        {/* Center Group */}
+        <div className='flex gap-2'>
+          <button className='btn btn-warning'>모험하기</button>
+          <button className='btn btn-error'>공연하기</button>
+          <button className='btn btn-neutral'>연습하기</button>
         </div>
 
-        {/* Right Sidebar */}
-        <div className='w-32 space-y-4'>
-          <button className='btn btn-accent w-full'>아이템 구매</button>
-          <button className='btn btn-primary w-full'>아이템 수리</button>
-          <button className='btn btn-neutral w-full'>연습하기</button>
+        {/* Right Group */}
+        <div className='flex gap-2'>
+          <button className='btn btn-accent'>아이템 구매</button>
+          <button className='btn btn-primary'>아이템 수리</button>
         </div>
-      </div>
-
-      {/* 이벤트 상태 */}
-      <div className='mt-4 p-4 bg-base-200 rounded-lg'>
-        <p>오늘의 랜덤 이벤트: {game.random_done ? '완료' : '미완료'}</p>
       </div>
     </div>
   );
