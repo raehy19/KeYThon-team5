@@ -200,10 +200,12 @@ const GameContent: React.FC<{ game: Game }> = ({ game }) => {
             </div>
           </div>
         </div>
-        <div className='stats bg-base-100 shadow'>
-          <div className='stat'>
-            <div className='stat-title'>시간</div>
-            <div className='stat-value'>{formatGameTime(game.time)}</div>
+        <div className='flex flex-col'>
+          <div className='stats bg-base-100 shadow'>
+            <div className='stat'>
+              <div className='stat-title'>시간</div>
+              <div className='stat-value'>{formatGameTime(game.time)}</div>
+            </div>
           </div>
           <EndGameButton gameId={game.id} />
         </div>
