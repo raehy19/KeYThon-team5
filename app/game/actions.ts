@@ -532,7 +532,7 @@ const generateRandomName = (): string => {
 
 // 랜덤 포지션 생성
 const generateRandomPosition = (): string => {
-  const positions = ['보컬', '기타', '드럼', '키보드'];
+  const positions = ['메인보컬', '일렉기타', '드럼', '키보드', '베이스'];
   return positions[Math.floor(Math.random() * positions.length)];
 };
 
