@@ -114,7 +114,7 @@ const generateItems = (job: string | null): Item[] => {
     return {
       name,
       power,
-      price: power * 3, // power에 비례한 가격
+      price: power * 10, // power에 비례한 가격
     };
   });
 };

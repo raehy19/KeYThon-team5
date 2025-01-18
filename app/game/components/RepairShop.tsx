@@ -44,7 +44,7 @@ const calculateRepairCost = (
 ): number => {
   const durabilityToRepair = 100 - currentDurability;
   // 능력치가 높을수록, 수리해야 할 내구도가 클수록 수리비가 비쌈
-  return Math.floor(durabilityToRepair * itemPower * 100);
+  return Math.floor((durabilityToRepair * itemPower) / 12);
 };
 
 export default function RepairShop({ game }: RepairShopProps) {
