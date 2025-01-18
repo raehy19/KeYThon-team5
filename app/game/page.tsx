@@ -8,6 +8,9 @@ import Performance from './components/Performance';
 import Rest from '@/app/game/components/Rest';
 import ItemShop from '@/app/game/components/ItemShop';
 import RepairShop from '@/app/game/components/RepairShop';
+import AdventureModal from '@/app/game/components/AdventureModal';
+import Practice from '@/app/game/components/Practice';
+import EndGameButton from '@/app/game/components/EndGameButton';
 
 interface Character {
   name: string | null;
@@ -197,11 +200,14 @@ const GameContent: React.FC<{ game: Game }> = ({ game }) => {
             </div>
           </div>
         </div>
-        <div className='stats bg-base-100 shadow'>
-          <div className='stat'>
-            <div className='stat-title'>시간</div>
-            <div className='stat-value'>{formatGameTime(game.time)}</div>
+        <div className='flex flex-col'>
+          <div className='stats bg-base-100 shadow'>
+            <div className='stat'>
+              <div className='stat-title'>시간</div>
+              <div className='stat-value'>{formatGameTime(game.time)}</div>
+            </div>
           </div>
+          <EndGameButton gameId={game.id} />
         </div>
       </div>
 
@@ -269,14 +275,15 @@ const GameContent: React.FC<{ game: Game }> = ({ game }) => {
 
         {/* Center Group */}
         <div className='flex gap-2'>
-          <button className='btn btn-warning'>모험하기</button>
+          <AdventureModal game={game} />
           <Performance
             gameId={game.id}
             currentTime={game.time}
             mental={game.mental}
             fame={game.fame}
+            teamPower={game.team_power}
           />
-          <button className='btn btn-neutral'>연습하기</button>
+          <Practice gameId={game.id} currentTime={game.time} />
         </div>
 
         {/* Right Group */}

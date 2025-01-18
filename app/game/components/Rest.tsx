@@ -1,4 +1,3 @@
-// app/game/components/PartTimeJob.tsx
 'use client';
 
 import { useState } from 'react';
@@ -12,11 +11,7 @@ interface RestProps {
   mental: number;
 }
 
-export default function Rest({
-  gameId,
-  currentTime,
-  mental,
-}: RestProps) {
+export default function Rest({ gameId, currentTime, mental }: RestProps) {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isResting, setIsResting] = useState(false);
@@ -26,8 +21,6 @@ export default function Rest({
 
   const startWork = () => {
     const currentHour = getHour(currentTime);
-
-    
 
     setIsModalOpen(true);
     setIsResting(true);
@@ -50,15 +43,12 @@ export default function Rest({
   };
 
   const completeWork = () => {
-    const Increasedmental = Math.floor(Math.random() * 10) + 5;
-    
-
     let newTime = currentTime + 6;
     if (getHour(newTime) >= 24) {
       newTime = getNextDayTime(newTime);
     }
 
-    updateGameAfterRest(gameId, newTime, Increasedmental)
+    updateGameAfterRest(gameId, newTime)
       .then(() => {
         setIsModalOpen(false);
         setProgress(0);

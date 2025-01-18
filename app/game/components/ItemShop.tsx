@@ -1,4 +1,3 @@
-// app/game/components/ItemShop.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -27,29 +26,95 @@ interface MemberData {
 
 const getItemName = (job: string | null): string[] => {
   switch (job) {
-    case '보컬':
-      return ['프리미엄 마이크', '스튜디오 마이크', '무선 마이크'];
-    case '기타':
-      return ['일렉트릭 기타', '어쿠스틱 기타', '베이스 기타'];
+    case '메인보컬':
+      return [
+        '뉴만 U87 스튜디오 마이크',
+        '쇼어 SM7B 방송용 마이크',
+        '젠하이저 e935 라이브 마이크',
+        '오디오테크니카 AT2020 USB 마이크',
+        'AKG C414 컨덴서 마이크',
+        '로데 NT1-A 보컬 마이크',
+        '블루 예티 X 프로 마이크',
+        'SE Electronics sE2200 스튜디오 마이크',
+        '워름 WA-47 튜브 마이크',
+        '아포지 HypeMiC USB 마이크',
+      ];
+    case '일렉기타':
+      return [
+        '깁슨 레스폴 스탠다드',
+        '펜더 스트라토캐스터 프로페셔널',
+        'PRS 커스텀 24',
+        '아이바네즈 RG 프리스티지',
+        '깁슨 SG 스탠다드',
+        '잭슨 솔로이스트 프로',
+        '구스 베넷 긴스버그 시그니처',
+        '칼 톰슨 CT624 커스텀',
+        'ESP E-II 호라이즌',
+        '샤벨 프로 모드 DK24',
+      ];
     case '드럼':
-      return ['전자 드럼', '어쿠스틱 드럼', '프리미엄 드럼'];
+      return [
+        '펄 마스터스 메이플 리저브',
+        '타마 스타클래식 버블링햄',
+        'DW 콜렉터스 시리즈 메이플',
+        '루드윅 클래식 메이플',
+        '그레치 브로드케스터',
+        '야마하 리코딩 커스텀',
+        '소노 마티니 빈티지',
+        '메이플워크스 커스텀 시리즈',
+        '에이드리언 드럼웍스 스페셜',
+        '캔옵스 뉴요커 시리즈',
+      ];
     case '키보드':
-      return ['신디사이저', '디지털 피아노', '스테이지 피아노'];
+      return [
+        '노드 스테이지 3 콤팩트',
+        '롤랜드 팬텀 8',
+        '야마하 몬태지 8',
+        '코르그 크로노스 2',
+        '데이브 스미스 프로펫 Rev2',
+        '모그 원',
+        '쿠르츠바일 PC4',
+        '아티uria 폴리브루트',
+        '노베이션 서밋',
+        '롤랜드 주피터 X',
+      ];
     case '베이스':
-      return ['일렉트릭 베이스', '어쿠스틱 베이스', '프리미엄 베이스'];
+      return [
+        '펜더 프리시전 엘리트',
+        '뮤직맨 스팅레이 5 HH',
+        '워윅 스트리머 LX',
+        '스페터 유로 5 LX',
+        '포데라 임페리얼 커스텀 5',
+        'MTD 킹스턴 Z5',
+        '레이크우드 스카이라인',
+        '델라 크루즈 USBL',
+        '사들러 빈티지 5',
+        '알렘빅 에센스 NT',
+      ];
     default:
-      return ['기본 악기 1', '기본 악기 2', '기본 악기 3'];
+      return [
+        '야마하 입문용 기타',
+        '롤랜드 디지털 피아노',
+        '케이스 우쿨렐레',
+        '펄 스네어 드럼',
+        '쉬어 SM58 마이크',
+        '카시오 키보드',
+        '칼림바 17키',
+        '에피폰 베이스',
+        '짐블 전자드럼',
+        '코르그 미니 신디사이저',
+      ];
   }
 };
 
 const generateItems = (job: string | null): Item[] => {
   const names = getItemName(job);
   return names.map((name) => {
-    const power = Math.floor(Math.random() * 30) + 20; // 20-50 power
+    const power = Math.floor(Math.random() * 200) + 10;
     return {
       name,
       power,
-      price: power * 3, // power에 비례한 가격
+      price: power * 10, // power에 비례한 가격
     };
   });
 };
@@ -177,7 +242,7 @@ export default function ItemShop({ game }: ItemShopProps) {
 
             <div className='mb-4'>
               <p className='text-sm text-gray-600'>
-                현재 잔액: {game.money.toLocaleString()}원
+                현재 잔액: {game.money.toLocaleString()}만 원
               </p>
               {getMemberData(game, selectedMember).hasItem && (
                 <p className='text-sm text-gray-600'>
@@ -199,7 +264,7 @@ export default function ItemShop({ game }: ItemShopProps) {
                       능력치: {item.power}
                     </p>
                     <p className='text-sm text-gray-600'>
-                      가격: {item.price.toLocaleString()}원
+                      가격: {item.price.toLocaleString()}만 원
                     </p>
                   </div>
                   <button
