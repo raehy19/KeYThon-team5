@@ -1,4 +1,3 @@
-// app/game/components/PartTimeJob.tsx
 'use client';
 
 import { useState } from 'react';

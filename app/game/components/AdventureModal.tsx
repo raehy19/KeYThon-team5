@@ -1,4 +1,3 @@
-// app/game/components/AdventureModal.tsx
 'use client';
 
 import { useState } from 'react';

@@ -9,6 +9,7 @@ import Rest from '@/app/game/components/Rest';
 import ItemShop from '@/app/game/components/ItemShop';
 import RepairShop from '@/app/game/components/RepairShop';
 import AdventureModal from '@/app/game/components/AdventureModal';
+import Practice from '@/app/game/components/Practice';
 
 interface Character {
   name: string | null;
@@ -277,7 +278,7 @@ const GameContent: React.FC<{ game: Game }> = ({ game }) => {
             mental={game.mental}
             fame={game.fame}
           />
-          <button className='btn btn-neutral'>연습하기</button>
+          <Practice gameId={game.id} currentTime={game.time} />
         </div>
 
         {/* Right Group */}

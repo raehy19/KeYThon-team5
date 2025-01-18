@@ -724,3 +724,134 @@ export async function updateGameAfterAdventure(
   if (error) return { error: error.message };
   return { success: true, eventResult: updateFields };
 }
+export async function updateGameAfterPractice(
+  gameId: string,
+  score: number, // 미니게임 점수 (0-100)
+  newTime: number
+) {
+  const supabase = await createClient();
+
+  // 현재 게임 상태 확인
+  const { data: currentGame } = await supabase
+    .from('games')
+    .select('*')
+    .eq('id', gameId)
+    .single();
+
+  if (!currentGame) return { error: 'Game not found' };
+
+  let shouldResetRandomDone = false;
+
+  // 날짜가 바뀌는지 확인
+  if (Math.floor(newTime / 100) > Math.floor(currentGame.time / 100)) {
+    shouldResetRandomDone = true;
+  }
+
+  // 점수에 따른 능력치 상승 범위 결정
+  const powerIncreaseRange = {
+    min: Math.floor(score / 20), // 0-5
+    max: Math.floor(score / 10), // 0-10
+  };
+
+  // 멘탈 감소량 계산 (점수가 높을수록 덜 감소)
+  const mentalDecreaseRange = {
+    min: Math.max(20 - Math.floor(score / 5), 5), // 점수가 100점이면 5~10, 0점이면 20~25
+    max: Math.max(25 - Math.floor(score / 5), 10),
+  };
+  const mentalDecrease =
+    Math.floor(
+      Math.random() * (mentalDecreaseRange.max - mentalDecreaseRange.min + 1)
+    ) + mentalDecreaseRange.min;
+
+  // 업데이트할 필드 준비
+  let updateFields: Partial<Game> = {
+    time: newTime,
+    random_done: shouldResetRandomDone ? false : undefined,
+    mental: Math.max(currentGame.mental - mentalDecrease, 0), // 멘탈 감소 추가
+  };
+
+  // 메인 캐릭터 능력치 상승 및 악기 내구도 감소
+  const mainPowerIncrease =
+    Math.floor(
+      Math.random() * (powerIncreaseRange.max - powerIncreaseRange.min + 1)
+    ) + powerIncreaseRange.min;
+  updateFields.main_power = currentGame.main_power + mainPowerIncrease;
+
+  if (currentGame.main_has_item && currentGame.main_item_du > 0) {
+    const durabilityDecrease = Math.floor(Math.random() * 10) + 5; // 5-15 감소
+    const newDurability = currentGame.main_item_du - durabilityDecrease;
+
+    if (newDurability <= 0) {
+      // 악기 파괴
+      updateFields = {
+        ...updateFields,
+        main_has_item: false,
+        main_item_name: null,
+        main_item_power: 0,
+        main_item_du: 0,
+      };
+    } else {
+      // 내구도만 감소
+      updateFields.main_item_du = newDurability;
+    }
+  }
+
+  // 팀원들 능력치 상승 및 악기 내구도 감소 처리
+  for (let i = 1; i <= 4; i++) {
+    const matePrefix = `mate${i}_` as const;
+    const matePower = currentGame[`${matePrefix}power` as keyof Game] as number;
+    const hasItem = currentGame[
+      `${matePrefix}has_item` as keyof Game
+    ] as boolean;
+    const itemDurability = currentGame[
+      `${matePrefix}item_du` as keyof Game
+    ] as number;
+
+    if (matePower > 0) {
+      // 팀원이 존재하는 경우
+      const powerIncrease =
+        Math.floor(
+          Math.random() * (powerIncreaseRange.max - powerIncreaseRange.min + 1)
+        ) + powerIncreaseRange.min;
+      updateFields = {
+        ...updateFields,
+        [`${matePrefix}power`]: matePower + powerIncrease,
+      } as Partial<Game>;
+
+      if (hasItem && itemDurability > 0) {
+        const durabilityDecrease = Math.floor(Math.random() * 10) + 5; // 5-15 감소
+        const newDurability = itemDurability - durabilityDecrease;
+
+        if (newDurability <= 0) {
+          // 악기 파괴
+          updateFields = {
+            ...updateFields,
+            [`${matePrefix}has_item`]: false,
+            [`${matePrefix}item_name`]: null,
+            [`${matePrefix}item_power`]: 0,
+            [`${matePrefix}item_du`]: 0,
+          } as Partial<Game>;
+        } else {
+          // 내구도만 감소
+          updateFields = {
+            ...updateFields,
+            [`${matePrefix}item_du`]: newDurability,
+          } as Partial<Game>;
+        }
+      }
+    }
+  }
+
+  // 팀 전체 능력치 업데이트
+  const newGameState = { ...currentGame, ...updateFields };
+  updateFields.team_power = calculateTeamPower(newGameState);
+
+  // 업데이트 수행
+  const { error } = await supabase
+    .from('games')
+    .update(updateFields)
+    .eq('id', gameId);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}
